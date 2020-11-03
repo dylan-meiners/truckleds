@@ -1,0 +1,6 @@
+.vscode/*
+interface-server/node_modules/*
+control/*
+package-lock.json
+desktop.ini
+Icon/*

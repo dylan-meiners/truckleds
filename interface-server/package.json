@@ -1,0 +1,18 @@
+{
+  "name": "interface-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "author": "dylan-meiners",
+  "license": "ISC",
+  "dependencies": {
+    "bluetooth-hci-socket": "^0.5.1",
+    "noble": "^1.9.1",
+    "node": "^15.0.1",
+    "onoff": "^6.0.1",
+    "serialport": "^9.0.2"
+  }
+}
