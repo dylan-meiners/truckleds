@@ -7,7 +7,7 @@ dataRequestPin.writeSync(0)
 var dataAckPin = new GPIO(20, "in")
 
 const SerialPort = require("serialport")
-const port = new SerialPort("COM3", {
+const port = new SerialPort("/dev/ttyACM0", {
     baudRate: 115200
 })
 port.on("error", function(error) {
@@ -132,7 +132,7 @@ function run(peripheral) {
                                 var police = data[2] == "1" ? 1 : 0
                                 var effect = data[3] == "1" ? 1 : 0
                                 var effectIndex = data.charCodeAt(4) - 48
-                                toSend.push(warning || effect)
+                                toSend.push(!(warning || effect))
                                 var correspondingIndex = 0
                                 if (warning) {
                                     if (warningIndex == 3 || warningIndex == 4 || warningIndex == 5) {
@@ -146,23 +146,32 @@ function run(peripheral) {
                                 }
                                 toSend.push(correspondingIndex)
                                 toSend.push(police)
+				if (correspondingIndex == 12) {
+				    var direction = data.charCodeAt(1) - 48 - 3
+				    if (direction == 0) toSend.push(0)
+				    else if (direction == 1) toSend.push(2)
+				    else toSend.push(1)
+				}
+				else toSend.push(0)
                             }
+			    console.log(toSend)
                             dataRequestPin.writeSync(1)
                             var serialTimeoutMillis = new Date().getTime()
-                            while (dataAckPin.readSync() === 0 || (new Date().getTime() - serialTimeoutMillis < 1000));
+                            while (dataAckPin.readSync() === 0 && (new Date().getTime() - serialTimeoutMillis < 1000));
                             if (dataAckPin.readSync() === 1) { port.write(toSend) }
                             else prettyLog("Couldn't send data because serial timed out")
+                            dataRequestPin.writeSync(0)
                         })
                         
                         updateInt = setInterval(function() {
                             var date = new Date()
                             var millis = date.getTime()
                             if (millis - lastUpdate >= 2000) {
-                                characteristics[0].read()
+                                //characteristics[0].read()
                                 setTimeout(function() {
                                     if (millis - lastUpdate >= 3000) {
-                                        prettyLog("Read timed out, disconnecting", peripheral.address)
-                                        peripheral.disconnect()
+                                        //prettyLog("Read timed out, disconnecting", peripheral.address)
+                                        //peripheral.disconnect()
                                     }
                                 }, 1000)
                             }
