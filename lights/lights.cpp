@@ -51,9 +51,7 @@ typedef enum {
 } EffectIndex;
 EffectIndex activeEffect, oldEffect;
 
-// Timers; Not initialized because they are initialized during setup
-long timer, test_timer, serial_timer;
-bool driving = true;
+bool driving = false;
 bool police = false;
 bool brake = false;
 // Does not need to be set to 0; data is cleared in setup()
@@ -90,16 +88,12 @@ void setup() {
     FastLED.addLeds<WS2811, RIGHT_LED_PIN, BRG>(right, NUM_RB_LEDS);
     FastLED.clear();
     FastLED.show();
-    switchEffect(E_HALFHALF);
-
-    timer = millis();
-    test_timer = millis();
-    serial_timer = millis();
+    switchEffect(E_OFF);
 }
 
 void loop() {
     
-    checkPi();
+    //checkPi();
     long current = millis();
     if (driving) updateDriving(current);
     if (effects[activeEffect]->step(leds, current, updateStrobe(), police, brake)) switchEffect(oldEffect);
@@ -134,6 +128,7 @@ void clearNoShow() {
 bool updateStrobe() {
 
     static bool strobeToggle = false;
+    static long timer = millis();
 
     long current = millis();
     if (current - timer >= STROBE_MS) {

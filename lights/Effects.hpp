@@ -328,35 +328,38 @@ class Segment : public Effect {
             
             for (int i = 0; i < NUM_STRIPS; i++) {
                 
-                int batchSize = getLength(i) / 12;
-                for (int j = 0; j < batchSize; j++) {
+                int length = getLength(i);
+                int batchSize = i == 0 ? 12 : 4;
+                int batches = length / batchSize;
+                for (int j = 0; j < batches; j++) {
                     
                     int batchSizeHalf = batchSize / 2;
                     for (int k = 0; k < batchSizeHalf; k++) {
 
                         if (m_red) {
 
-                            leds[i][j * 12 + k] = strobeToggle ? (police ? BLUE : WHITE) : OFF;
+                            leds[i][j * batchSize + k] = strobeToggle ? (police ? BLUE : WHITE) : OFF;
                         }
                         else {
 
-                            leds[i][j * 12 + k] = OFF;
+                            leds[i][j * batchSize + k] = OFF;
                         }
                     }
-                    for (int k = batchSizeHalf; k < 12; k++) {
+                    for (int k = batchSizeHalf; k < batchSize; k++) {
 
                         if (!m_red) {
 
-                            leds[i][j * 12 + k] = strobeToggle ? (police ? RED : AMBER) : OFF;
+                            leds[i][j * batchSize + k] = strobeToggle ? (police ? RED : AMBER) : OFF;
                         }
                         else {
 
-                            leds[i][j * 12 + k] = OFF;
+                            leds[i][j * batchSize + k] = OFF;
                         }
                     }
-                    
                 }
             }
+            leds[LEFT_LEDS][NUM_RB_LEDS - 1] = RED;
+            leds[RIGHT_LEDS][NUM_RB_LEDS - 1] = RED;
             return false;
         }
 
@@ -531,19 +534,19 @@ class RainbowWave : public Effect {
 
         bool step(CRGB **leds, long current, bool strobeToggle, bool police, bool brake) {
 
-            for (int i = NUM_RB_LEDS; i > 0; i--) {
+            for (int i = 45; i > 0; i--) {
 
-                leds[LEFT_LEDS][i] = CHSV((i * 255.0 / NUM_LEDS_TOTAL) + m_waveCounter * WAVE_SPEED_SCALAR, 255, 255);
+                leds[LEFT_LEDS][i] = CHSV((((45 - i) * 3) * 255.0 / (366)) + m_waveCounter * WAVE_SPEED_SCALAR, 255, 255);
             }
-            for (int i = 0; i > NUM_LEDS; i++) {
+            for (int i = 0; i < NUM_LEDS; i++) {
 
-                leds[BACK_LEDS][i] = CHSV(((i + NUM_RB_LEDS) * 255.0 / NUM_LEDS_TOTAL) + m_waveCounter * WAVE_SPEED_SCALAR, 255, 255);
+                leds[BACK_LEDS][i] = CHSV(((i + (45 * 3)) * 255.0 / (366)) + m_waveCounter * WAVE_SPEED_SCALAR, 255, 255);
             }
-            for (int i = 0; i < NUM_RB_LEDS; i++) {
+            for (int i = 0; i < 45; i++) {
 
-                leds[RIGHT_LEDS][i] = CHSV(((i + NUM_RB_LEDS + NUM_LEDS) * 255.0 / NUM_LEDS_TOTAL) + m_waveCounter * WAVE_SPEED_SCALAR, 255, 255);
+                leds[RIGHT_LEDS][i] = CHSV((((i * 3) + (45 * 3) + NUM_LEDS) * 255.0 / (366)) + m_waveCounter * WAVE_SPEED_SCALAR, 255, 255);
             }
-            m_waveCounter += (255.0 / (double)NUM_LEDS_TOTAL) * WAVE_SPEED_SCALAR;
+            m_waveCounter += (255.0 / (double)(366)) * WAVE_SPEED_SCALAR;
             return false;
         }
 

@@ -142,7 +142,6 @@ function run(peripheral) {
                                 }
                                 else if (effect) {
                                     correspondingIndex = effectIndex + 16
-                                    console.log(correspondingIndex)
                                 }
                                 toSend.push(correspondingIndex)
                                 toSend.push(police)
