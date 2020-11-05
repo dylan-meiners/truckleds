@@ -429,7 +429,7 @@ class Director : public Effect {
 
         bool step(CRGB **leds, long current, bool strobeToggle, bool police, bool brake) {
 
-            for (int i = 0; i < 2; i++) for (int j = 0; j < NUM_RB_LEDS; j++) leds[i][j] = OFF;
+            for (int i = 1; i < 3; i++) for (int j = 0; j < NUM_RB_LEDS; j++) leds[i][j] = OFF;
             if (m_ramping) {
                 
                 if ((current - m_timer >= 5 && (m_direction == 0 || m_direction == 2)) ||
@@ -590,7 +590,7 @@ class Blinker : public Effect {
 
         bool step(CRGB **leds, long current, bool strobeToggle, bool police, bool brake) {
 
-            for (int i = 0; i < 2; i++) for (int j = 0; j < NUM_RB_LEDS; j++) leds[i][j] = OFF;
+            for (int i = 1; i < 3; i++) for (int j = 0; j < NUM_RB_LEDS; j++) leds[i][j] = OFF;
             if (current - m_timer >= BLINK_MAX_OFF / NUM_LEDS / 2) {
 
                 if (m_next_ramp >= 0) {
@@ -659,7 +659,7 @@ class Brake : public Effect {
 
         bool step(CRGB **leds, long current, bool strobeToggle, bool police, bool brake) {
 
-            for (int i = 0; i < 2; i++) for (int j = 0; j < NUM_RB_LEDS; j++) leds[i][j] = OFF;
+            for (int i = 1; i < 3; i++) for (int j = 0; j < NUM_RB_LEDS; j++) leds[i][j] = OFF;
             for (int i = 0; i < NUM_LEDS; i++) leds[BACK_LEDS][i] = RED;
             return false;
         }

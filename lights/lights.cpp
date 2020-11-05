@@ -93,7 +93,7 @@ void setup() {
 
 void loop() {
     
-    //checkPi();
+    checkPi();
     long current = millis();
     if (driving) updateDriving(current);
     if (effects[activeEffect]->step(leds, current, updateStrobe(), police, brake)) switchEffect(oldEffect);
