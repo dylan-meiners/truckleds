@@ -223,7 +223,7 @@ void updateDriving(long current) {
                         }
                         else {
 
-                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle ? true : false;
+                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle;
                             blinker->m_on_off_cycle = false;
                             if (blinker->m_was_on_off_cycle) {
 
@@ -259,7 +259,7 @@ void updateDriving(long current) {
                         }
                         else {
 
-                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle ? true : false;
+                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle;
                             blinker->m_on_off_cycle = false;
                             if (blinker->m_was_on_off_cycle) {
 
@@ -288,7 +288,7 @@ void updateDriving(long current) {
 
                         if (left) {
                             
-                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle ? true : false;
+                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle;
                             blinker->m_on_off_cycle = false;
                             if (blinker->m_was_on_off_cycle) {
 
@@ -326,7 +326,7 @@ void updateDriving(long current) {
 
                         if (right) {
                             
-                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle ? true : false;
+                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle;
                             blinker->m_on_off_cycle = false;
                             if (blinker->m_was_on_off_cycle) {
 
