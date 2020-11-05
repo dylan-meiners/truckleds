@@ -126,7 +126,7 @@ function run(peripheral) {
                             prettyLog("Got new data: " + newData.toString("utf-8"), peripheral.address)
                             data = newData.toString("utf-8")
                             var toSend = []
-                            if (data.length == 5) {
+                            if (data.length == 8) {
                                 var warning = data[0] == "1" ? 1 : 0
                                 var warningIndex = data.charCodeAt(1) - 48
                                 var police = data[2] == "1" ? 1 : 0
@@ -145,6 +145,9 @@ function run(peripheral) {
                                 }
                                 toSend.push(correspondingIndex)
                                 toSend.push(police)
+                                toSend.push(data[5]); // R
+                                toSend.push(data[6]); // G
+                                toSend.push(data[7]); // B
                             }
                             dataRequestPin.writeSync(1)
                             var serialTimeoutMillis = new Date().getTime()

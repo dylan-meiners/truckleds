@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <Arduino.h>
 #include <FastLED.h>
 #include "ks.hpp"
@@ -574,6 +575,8 @@ class Trail : public Effect {
 
         bool step(CRGB **leds, long current, bool strobeToggle, bool police, bool brake) {}
         void reset() {}
+
+        vector<CRGB> colors;
 };
 
 class Solid : public Effect {

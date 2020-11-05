@@ -88,12 +88,12 @@ void setup() {
     FastLED.addLeds<WS2811, RIGHT_LED_PIN, BRG>(right, NUM_RB_LEDS);
     FastLED.clear();
     FastLED.show();
-    switchEffect(E_OFF);
+    switchEffect(E_HALFHALF);
 }
 
 void loop() {
     
-    //checkPi();
+    checkPi();
     long current = millis();
     if (driving) updateDriving(current);
     if (effects[activeEffect]->step(leds, current, updateStrobe(), police, brake)) switchEffect(oldEffect);
@@ -145,20 +145,33 @@ void checkPi() {
         ClearSerial();
         // Tell control its okay to send data now
         digitalWrite(DATA_REQUEST_READY_PIN, HIGH);
-        digitalWrite(LED_BUILTIN, HIGH);
-        char rec[4] = { 0 };
-        int nrec = Serial.readBytes(rec, 4);
-        ClearSerial();
+        char rec[5] = { 0 };
+        int nrec = Serial.readBytes(rec, 5);
         digitalWrite(DATA_REQUEST_READY_PIN, LOW);
-        //digitalWrite(LED_BUILTIN, LOW);
-        if (nrec == 4) {
+        if (nrec == 5) {
 
             driving = rec[0];
             switchEffect((EffectIndex)((int)rec[1]));
             police = rec[2];
             ((Director*)effects[E_DIRECT])->m_direction = rec[3];
+            if ((rec[4] != 0) && (rec[4] % 3 == 0) && (rec[4] < 13))  {
+
+                // rec[4] is the number of incoming colors
+                char more[rec[4]] = { 0 };
+                Serial.readBytes(more, rec[4]);
+                
+                if (effectIndex == E_TRAIL) {
+                
+                    for (int i = 0; i < rec[4]; i++) {
+
+                        (Trail*)effects[E_TRAIL]->clear();
+                        (Trail*)effects[E_TRAIL]->colors.push_back(CRGB(more[i] * 3, more[i] * 3 + 1, more[i] * 3 + 2));
+                    }
+                }
+            }
         }
         else driving = true;
+        ClearSerial();
     }
 }
 
