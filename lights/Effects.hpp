@@ -25,6 +25,77 @@ class Off : public Effect {
         void reset() {};
 };
 
+class Startup {
+
+    public:
+
+        // Not a public Effect. This one's step function returns false when
+        // completed.
+        bool step(CRGB **leds) {
+
+            long current = millis();
+            long delta = current - m_timer;
+
+            if (!fading) {
+                
+                int totalLitRBNotRounded = (1.2448304835282 * pow(1.0085050662548, (double)(delta + 15)) - 1.4134533) / 3.0;
+                int totalLitRB = RoundLit(totalLitRBNotRounded);
+                if (totalLitRB < 0) totalLitRB = 0;
+                else if (totalLitRB > 22) totalLitRB = 22;
+                int toLight = totalLitRB - m_numLitRB;
+                if (toLight != 0) {
+
+                    for (int i = 1; i < 3; i++) {
+
+                        for (int j = 0; j < toLight; j++) {
+
+                            leds[i][NUM_RB_LEDS / 2 - 1 - m_numLitRB - j] = BLUE;
+                            leds[i][NUM_RB_LEDS / 2 + m_numLitRB + j] = BLUE;
+                        }
+                        if (totalLitRB == 22) {
+
+                            leds[i][NUM_RB_LEDS - 1] = BLUE;
+                        }
+                    }
+                    m_numLitRB += toLight;
+                }
+                int totalLitBack = RoundLit(totalLitRBNotRounded / 22.0 * 48.0);
+                if (totalLitBack < 0) totalLitBack = 0;
+                else if (totalLitBack > 48) totalLitBack = 48;
+                toLight = totalLitBack - m_numLitBack;
+                if (toLight != 0) {
+
+                    for (int i = 0; i < toLight; i++) {
+
+                        leds[BACK_LEDS][NUM_LEDS / 2 - 1 - m_numLitBack - i] = BLUE;
+                        leds[BACK_LEDS][NUM_LEDS / 2 + m_numLitBack + i] = BLUE;
+                    }
+                }
+
+                FastLED.setBrightness(RoundLit(totalLitRB / 22.0 * 255.0));
+                if (totalLitRB == 22) {
+
+                    fading = true;
+                    m_timer = current;
+                }
+            }
+            else {
+
+                int brightness = 255 - RoundLit(delta / 2000.0 * 255.0);
+                FastLED.setBrightness(brightness);
+                if (brightness == 0) return false;
+            }
+            return true;
+        }
+
+    private:
+
+        long m_timer = millis();
+        int m_numLitRB = 0;
+        int m_numLitBack = 0;
+        bool fading = false;
+};
+
 class BLEConnected : public Effect {
 
     public:

@@ -46,12 +46,11 @@ typedef enum {
     E_RAINBOW_WAVE      = 16,
     E_MUSIC             = 17,
     E_TRAIL             = 18,
-    E_SOLID             = 19,
-    E_DRIVING           = 20
+    E_SOLID             = 19
 } EffectIndex;
 EffectIndex activeEffect, oldEffect;
 
-bool driving = false;
+bool driving = true;
 bool police = false;
 bool brake = false;
 // Does not need to be set to 0; data is cleared in setup()
@@ -84,11 +83,14 @@ void setup() {
     pinMode(CONTROL_CHECK_PIN, INPUT);
 
     FastLED.addLeds<WS2812, BACK_LED_PIN, GRB>(back, NUM_LEDS);
-    FastLED.addLeds<WS2811, LEFT_LED_PIN, BRG>(left, NUM_RB_LEDS);
-    FastLED.addLeds<WS2811, RIGHT_LED_PIN, BRG>(right, NUM_RB_LEDS);
+    FastLED.addLeds<WS2811, LEFT_LED_PIN, GRB>(left, NUM_RB_LEDS);
+    FastLED.addLeds<WS2811, RIGHT_LED_PIN, GRB>(right, NUM_RB_LEDS);
     FastLED.clear();
     FastLED.show();
     switchEffect(E_OFF);
+    Startup *startupEffect = new Startup();
+    while (startupEffect->step(leds)) { FastLED.show(); }
+    FastLED.show();
 }
 
 void loop() {
@@ -97,6 +99,11 @@ void loop() {
     long current = millis();
     if (driving) updateDriving(current);
     if (effects[activeEffect]->step(leds, current, updateStrobe(), police, brake)) switchEffect(oldEffect);
+    if (driving) {
+
+        if (digitalRead(A4)) for (int i = 1; i < 3; i++) for (int j = 0; j < NUM_RB_LEDS; j++) leds[i][j] = AMBER;
+        else for (int i = 1; i < 3; i++) for (int j = 0; j < NUM_RB_LEDS; j++) leds[i][j] = OFF;
+    }
     FastLED.show();
 }
 
@@ -145,18 +152,16 @@ void checkPi() {
         ClearSerial();
         // Tell control its okay to send data now
         digitalWrite(DATA_REQUEST_READY_PIN, HIGH);
-        digitalWrite(LED_BUILTIN, HIGH);
         char rec[4] = { 0 };
         int nrec = Serial.readBytes(rec, 4);
         ClearSerial();
         digitalWrite(DATA_REQUEST_READY_PIN, LOW);
-        //digitalWrite(LED_BUILTIN, LOW);
         if (nrec == 4) {
 
             driving = rec[0];
             switchEffect((EffectIndex)((int)rec[1]));
             police = rec[2];
-            ((Director*)effects[E_DIRECT])->m_direction = rec[3];
+            if (rec[3] != 1) ((Director*)effects[E_DIRECT])->m_direction = rec[3] == 0 ? 2 : 0;
         }
         else driving = true;
     }
@@ -198,9 +203,9 @@ void updateDriving(long current) {
         }
         else {
         
-            const bool backup = digitalRead(A3);
             const bool left = digitalRead(A1);
             const bool right = digitalRead(A2);
+            const bool backup = digitalRead(A3);
             Blinker* blinker = (Blinker*)effects[E_BLINKER];
 
             if (backup) switchEffect(E_BACKUP);
