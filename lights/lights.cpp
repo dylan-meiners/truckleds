@@ -148,20 +148,33 @@ bool updateStrobe() {
 
 void checkPi() {
     if (!SKIP_TEATHER_CHECK && !digitalRead(CONTROL_CHECK_PIN)) driving = true;
-    else if (digitalRead(DATA_REQUEST_PIN)) {
+    else if (digitalRead(PI_IS_REQUESTING_PIN)) {
         ClearSerial();
         // Tell control its okay to send data now
-        digitalWrite(DATA_REQUEST_READY_PIN, HIGH);
+        digitalWrite(ARDUINO_READY_PIN, HIGH);
         char rec[4] = { 0 };
         int nrec = Serial.readBytes(rec, 4);
         ClearSerial();
-        digitalWrite(DATA_REQUEST_READY_PIN, LOW);
+        digitalWrite(ARDUINO_READY_PIN, LOW);
         if (nrec == 4) {
 
             driving = rec[0];
             switchEffect((EffectIndex)((int)rec[1]));
             police = rec[2];
             if (rec[3] != 1) ((Director*)effects[E_DIRECT])->m_direction = rec[3] == 0 ? 2 : 0;
+            if (activeEffect == E_MUSIC) {
+
+                digitalWrite(ARDUINO_READY_PIN, HIGH);
+                char musicData[MUSIC_DATA_LENGTH] = { 0 };
+                nrec = Serial.readBytes(musicData, MUSIC_DATA_LENGTH);
+                digitalWrite(ARDUINO_READY_PIN, LOW);
+                Music *musicEffect = (Music*)effects[E_MUSIC];
+                if (nrec == MUSIC_DATA_LENGTH) {
+                    
+                    memcpy(musicEffect->data, musicData, MUSIC_DATA_LENGTH);
+                    musicEffect->shouldUpdate = true;
+                }
+            }
         }
         else driving = true;
     }

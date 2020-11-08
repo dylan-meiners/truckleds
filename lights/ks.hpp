@@ -16,8 +16,8 @@ const int BACK_LED_PIN          = 7;
 const int LEFT_LED_PIN          = 8;
 const int RIGHT_LED_PIN         = 9;
 const int CONTROL_CHECK_PIN     = 3;
-const int DATA_REQUEST_PIN      = 2;
-const int DATA_REQUEST_READY_PIN = 4;
+const int PI_IS_REQUESTING_PIN  = 2;
+const int ARDUINO_READY_PIN     = 4;
 const long BAUD_RATE            = 115200;
 const int SERIAL_TIMEOUT        = 1000;
 
@@ -35,6 +35,8 @@ const int BLINK_CYCLE_MS            = 750;
 const int BLINK_MAX_OFF             = BLINK_CYCLE_MS / 2;
 const int BLINK_MAX_OFF_W_TOLERANCE = BLINK_MAX_OFF * 1.1;
 const double WAVE_SPEED_SCALAR      = 1.0;
+const bool USING_RAMP               = false;
+const int MUSIC_DATA_LENGTH         = 90;
 
 // LEDs
 typedef enum {

@@ -1,13 +1,15 @@
 console.clear()
 var noble = require("noble")
 
+var PI_IS_REQUESTING_PIN = 21
+var ARDUINO_IS_READY_PIN = 20
 var GPIO = require("onoff").Gpio
-var dataRequestPin = new GPIO(21, "out")
-dataRequestPin.writeSync(0)
-var dataAckPin = new GPIO(20, "in")
+var piIsRequestingPin = new GPIO(PI_IS_REQUESTING_PIN, "out")
+piIsRequestingPin.writeSync(0)
+var arduinoIsReadyPin = new GPIO(ARDUINO_IS_READY_PIN, "in")
 
 const SerialPort = require("serialport")
-const port = new SerialPort("COM3", {
+const port = new SerialPort("/dev/ttyACM0", {
     baudRate: 115200
 })
 port.on("error", function(error) {
@@ -146,10 +148,10 @@ function run(peripheral) {
                                 toSend.push(correspondingIndex)
                                 toSend.push(police)
                             }
-                            dataRequestPin.writeSync(1)
+                            piIsRequestingPin.writeSync(1)
                             var serialTimeoutMillis = new Date().getTime()
-                            while (dataAckPin.readSync() === 0 || (new Date().getTime() - serialTimeoutMillis < 1000));
-                            if (dataAckPin.readSync() === 1) { port.write(toSend) }
+                            while (arduinoIsReadyPin.readSync() === 0 || (new Date().getTime() - serialTimeoutMillis < 1000));
+                            if (arduinoIsReadyPin.readSync() === 1) { port.write(toSend) }
                             else prettyLog("Couldn't send data because serial timed out")
                         })
                         

@@ -4,3 +4,4 @@ control/*
 package-lock.json
 desktop.ini
 Icon/*
+testing/*

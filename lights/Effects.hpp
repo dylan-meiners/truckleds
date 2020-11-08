@@ -635,8 +635,82 @@ class Music : public Effect {
 
     public:
 
-        bool step(CRGB **leds, long current, bool strobeToggle, bool police, bool brake) {}
-        void reset() {}
+        bool step(CRGB **leds, long current, bool strobeToggle, bool police, bool brake) {
+
+            for (int i = 0; i < NUM_RB_LEDS; i++) {
+
+                if (m_data[i * 2] >= m_data[i * 2 + 1]) m_compressedData[i] = m_data[i * 2];
+                else m_compressedData[i] = m_data[i * 2 + 1];
+            }
+
+            if (m_shouldUpdate) {
+
+                m_shouldUpdate = true;
+                double modified[MUSIC_DATA_LENGTH] = { 0.0 };
+
+                for (int i = 0; i < NUM_RB_LEDS; i++) {
+
+                    int masterVal = (int)m_compressedData[i];
+                    double masterScalar = masterVal / 255.0;
+
+                    if (masterVal != 0) {
+
+                        //middle
+                        modified[i] = masterScalar / 1.0;
+                        
+                        if (USING_RAMP) {
+                            
+                            int numOfFades = RoundLit(masterVal / 255.0 * 4);
+                            int valToSet;
+                            int valAlready;
+                            //left side
+                            for (int j = 0; j < numOfFades; j++) {
+                                
+                                valToSet = j + 2;
+                                valAlready = modified[i - j - 1];
+                                //                                          less than bc it is the bottom of a fraction
+                                if ((i - j - 1 >= 0 && i - j - 1 <= 127) && ((valToSet < valAlready) || valAlready == 0)) {
+
+                                    modified[i - j - 1] = masterScalar / valToSet;
+                                }
+                            }
+                            //right side
+                            for (int j = 0; j < numOfFades; j++) {
+                                
+                                valToSet = j + 2;
+                                valAlready = modified[i + j + 1];
+                                //                                          less than bc it is the bottom of a fraction
+                                if ((i + j + 1 >= 0 && i + j + 1 <= 127) && ((valToSet < valAlready) || valAlready == 0)) {
+
+                                    modified[i + j + 1] = masterScalar / valToSet;
+                                }
+                            }
+                        }
+                    }
+                    else if (modified[i] == 0) modified[i] = 0;
+                }
+
+                for (int i = 0; i < NUM_RB_LEDS; i++) {
+
+                    leds[i] = CHSV(
+                        i * 2 + wave_counter,
+                        255,
+                        (modified[i] == 0) ? 0 : (int)(modified[i] * 256) - 1;
+                    );
+                }
+            }
+        }
+
+        void reset() {
+
+            shouldUpdate = false;
+            memset(m_data, 0, MUSIC_DATA_LENGTH);
+            memset(m_compressedData, 0, NUM_RB_LEDS);
+        }
+
+        bool shouldUpdate = false;
+        char m_data[MUSIC_DATA_LENGTH] = { 0 };
+        char m_compressedData[NUM_RB_LEDS] = { 0 };
 };
 
 class Trail : public Effect {
