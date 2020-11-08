@@ -81,9 +81,10 @@ class Startup {
             }
             else {
 
-                int brightness = 255 - RoundLit(delta / 2000.0 * 255.0);
+                int brightness = 255.0 - RoundLit(delta / 2000.0 * 255.0);
+                if (brightness < 0) brightness = 0;
                 FastLED.setBrightness(brightness);
-                if (brightness == 0) return false;
+                if (delta >= 2000) return false;
             }
             return true;
         }

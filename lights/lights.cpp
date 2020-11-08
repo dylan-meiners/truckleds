@@ -91,6 +91,8 @@ void setup() {
     Startup *startupEffect = new Startup();
     while (startupEffect->step(leds)) { FastLED.show(); }
     FastLED.show();
+    FastLED.setBrightness(255);
+    FastLED.clear();
 }
 
 void loop() {
