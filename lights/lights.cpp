@@ -46,12 +46,11 @@ typedef enum {
     E_RAINBOW_WAVE      = 16,
     E_MUSIC             = 17,
     E_TRAIL             = 18,
-    E_SOLID             = 19,
-    E_DRIVING           = 20
+    E_SOLID             = 19
 } EffectIndex;
 EffectIndex activeEffect, oldEffect;
 
-bool driving = false;
+bool driving = true;
 bool police = false;
 bool brake = false;
 // Does not need to be set to 0; data is cleared in setup()
@@ -86,9 +85,16 @@ void setup() {
     FastLED.addLeds<WS2812, BACK_LED_PIN, GRB>(back, NUM_LEDS);
     FastLED.addLeds<WS2811, LEFT_LED_PIN, BRG>(left, NUM_RB_LEDS);
     FastLED.addLeds<WS2811, RIGHT_LED_PIN, BRG>(right, NUM_RB_LEDS);
+    FastLED.setBrightness(255);
     FastLED.clear();
     FastLED.show();
-    switchEffect(E_HALFHALF);
+    switchEffect(E_OFF);
+    Startup *startupEffect = new Startup();
+    while (startupEffect->step(leds)) { FastLED.show(); }
+    FastLED.show();
+    FastLED.setBrightness(255);
+    FastLED.clear();
+    FastLED.show();
 }
 
 void loop() {
@@ -97,6 +103,11 @@ void loop() {
     long current = millis();
     if (driving) updateDriving(current);
     if (effects[activeEffect]->step(leds, current, updateStrobe(), police, brake)) switchEffect(oldEffect);
+    if (driving) {
+
+        if (digitalRead(A4)) for (int i = 1; i < 3; i++) for (int j = 0; j < NUM_RB_LEDS; j++) leds[i][j] = AMBER;
+        else for (int i = 1; i < 3; i++) for (int j = 0; j < NUM_RB_LEDS; j++) leds[i][j] = OFF;
+    }
     FastLED.show();
 }
 
@@ -153,7 +164,7 @@ void checkPi() {
             driving = rec[0];
             switchEffect((EffectIndex)((int)rec[1]));
             police = rec[2];
-            ((Director*)effects[E_DIRECT])->m_direction = rec[3];
+            if (rec[3] != 1) ((Director*)effects[E_DIRECT])->m_direction = rec[3] == 0 ? 2 : 0;
             if ((rec[4] != 0) && (rec[4] % 3 == 0) && (rec[4] < 13))  {
 
                 // rec[4] is the number of incoming colors
@@ -211,9 +222,9 @@ void updateDriving(long current) {
         }
         else {
         
-            const bool backup = digitalRead(A3);
             const bool left = digitalRead(A1);
             const bool right = digitalRead(A2);
+            const bool backup = digitalRead(A3);
             Blinker* blinker = (Blinker*)effects[E_BLINKER];
 
             if (backup) switchEffect(E_BACKUP);
@@ -236,7 +247,7 @@ void updateDriving(long current) {
                         }
                         else {
 
-                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle ? true : false;
+                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle;
                             blinker->m_on_off_cycle = false;
                             if (blinker->m_was_on_off_cycle) {
 
@@ -272,7 +283,7 @@ void updateDriving(long current) {
                         }
                         else {
 
-                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle ? true : false;
+                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle;
                             blinker->m_on_off_cycle = false;
                             if (blinker->m_was_on_off_cycle) {
 
@@ -301,7 +312,7 @@ void updateDriving(long current) {
 
                         if (left) {
                             
-                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle ? true : false;
+                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle;
                             blinker->m_on_off_cycle = false;
                             if (blinker->m_was_on_off_cycle) {
 
@@ -339,7 +350,7 @@ void updateDriving(long current) {
 
                         if (right) {
                             
-                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle ? true : false;
+                            blinker->m_was_on_off_cycle = blinker->m_on_off_cycle;
                             blinker->m_on_off_cycle = false;
                             if (blinker->m_was_on_off_cycle) {
 

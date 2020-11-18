@@ -27,6 +27,7 @@ const CRGB BLUE     = CRGB(0, 0, 255);
 const CRGB AMBER    = CRGB(255, 50, 0);
 const CRGB WHITE    = CRGB(255, 255, 255);
 const CHSV OFF      = CHSV(0, 0, 0);
+const int BLUE_HUE  = 156;
 
 // Effect parameters
 const int STROBE_MS                 = 35;
