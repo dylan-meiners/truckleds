@@ -85,11 +85,15 @@ void setup() {
     FastLED.addLeds<WS2812, BACK_LED_PIN, GRB>(back, NUM_LEDS);
     FastLED.addLeds<WS2811, LEFT_LED_PIN, BRG>(left, NUM_RB_LEDS);
     FastLED.addLeds<WS2811, RIGHT_LED_PIN, BRG>(right, NUM_RB_LEDS);
+    FastLED.setBrightness(255);
     FastLED.clear();
     FastLED.show();
     switchEffect(E_OFF);
     Startup *startupEffect = new Startup();
     while (startupEffect->step(leds)) { FastLED.show(); }
+    FastLED.show();
+    FastLED.setBrightness(255);
+    FastLED.clear();
     FastLED.show();
 }
 
