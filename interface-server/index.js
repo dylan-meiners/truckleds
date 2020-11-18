@@ -7,7 +7,7 @@ dataRequestPin.writeSync(0)
 var dataAckPin = new GPIO(20, "in")
 
 const SerialPort = require("serialport")
-const port = new SerialPort("COM3", {
+const port = new SerialPort("/dev/ttyACM0", {
     baudRate: 115200
 })
 port.on("error", function(error) {
