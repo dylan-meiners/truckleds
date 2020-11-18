@@ -23,7 +23,8 @@ Effect* effects[] = {
     new RainbowWave(),
     new Music(),
     new Trail(),
-    new Solid()
+    new Solid(),
+    new RPM()
 };
 
 typedef enum {
@@ -46,7 +47,8 @@ typedef enum {
     E_RAINBOW_WAVE      = 16,
     E_MUSIC             = 17,
     E_TRAIL             = 18,
-    E_SOLID             = 19
+    E_SOLID             = 19,
+    E_RPM               = 20
 } EffectIndex;
 EffectIndex activeEffect, oldEffect;
 
@@ -165,7 +167,11 @@ void checkPi() {
             driving = rec[0];
             switchEffect((EffectIndex)((int)rec[1]));
             police = rec[2];
-            if (rec[3] != 1) ((Director*)effects[E_DIRECT])->m_direction = rec[3] == 0 ? 2 : 0;
+            if (activeEffect == E_DIRECT) {
+
+                if (rec[3] != 1) ((Director*)effects[E_DIRECT])->m_direction = rec[3] == 0 ? 2 : 0;
+            }
+            else if (activeEffect == E_RPM) ((RPM*)effects[E_RPM])->m_rpm = rec[3];
         }
         else driving = true;
     }

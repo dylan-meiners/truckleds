@@ -20,6 +20,8 @@ const int DATA_REQUEST_PIN      = 2;
 const int DATA_REQUEST_READY_PIN = 4;
 const long BAUD_RATE            = 115200;
 const int SERIAL_TIMEOUT        = 1000;
+const int IDLE_RPM              = 600;
+const int MAX_RPM               = 7000;
 
 // Colors
 const CRGB RED      = CRGB(255, 0, 0);

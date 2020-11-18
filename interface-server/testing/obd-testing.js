@@ -4,10 +4,8 @@ const port = new SerialPort("COM4", {
     baudRate: 38400
 })
 
-port.write("at z\r")
-
-port.on("data", function(dataRaw) {
-    data = String(dataRaw)
+port.on("data", function(data) {
+    data = String(data)
     if (data.includes(">")) port.write("010C\r")
     else if (data.startsWith("41 0C")) {
         //6,7 9,10

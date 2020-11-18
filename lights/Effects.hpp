@@ -656,6 +656,30 @@ class Solid : public Effect {
         void reset() {}
 };
 
+class RPM : public Effect {
+
+    public:
+
+        bool step(CRGB **leds, long current, bool strobeToggle, bool police, bool brake) {
+
+            double scaled = m_rpm / MAX_RPM * NUM_RB_LEDS;
+            if (scaled < 0) scaled = 0;
+            else if (scaled > NUM_RB_LEDS) scaled = (double)NUM_RB_LEDS;
+            int on = RoundLit(scaled);
+            int stopIndex = NUM_RB_LEDS - on - 1;
+
+            for (int i = 1; i < 3; i++) {
+
+                for (int j = NUM_RB_LEDS - 1; j >= stopIndex; j--) leds[i][j] = RED;
+                for (int j = NUM_RB_LEDS - on - 2; j >= 0; j--) leds[i][j] = OFF;
+            }
+        }
+
+        void reset() { m_rpm = 0.0 }
+
+        double m_rpm = 0.0
+}
+
 class Blinker : public Effect {
 
     public:
