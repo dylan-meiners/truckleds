@@ -233,37 +233,31 @@ var dataAckPin = new GPIO(20, "in")
 // Arduino
 var serialData = []
 const SerialPort = require("serialport")
-const arduino = new SerialPort("/dev/ttyACM0", {
-    baudRate: 115200
-})
-arduino.on("error", function(error) {
-    prettyLog("Serial arduino error: " + error)
-})
-arduino.on("data", function(data) {
-    serialData.push(data)
-})
+const arduino = new SerialPort("/dev/ttyACM0", { baudRate: 115200 })
+arduino.on("error", function(error) { prettyLog("Serial arduino error: " + error) })
+arduino.on("data", function(data) { serialData.push(data) })
 
-const obd = new SerialPort("/dev/ttyACM1", {
-    baudRate: 38400
-})
-function resetOBD() {
-    prettyLog("Resetting obd")
-    obd.write("atz")
-}
-const RPM_PID = "010C"
-obd.on("error", function(error) {
-    prettyLog("Serial port obd error: " + error)
-})
+const RPM_PID = "010C\r"
 var rpm = 0
 var rpmOn = false
 var checker = null
 var lastRequest = null
+const obd = new SerialPort("/dev/ttyACM1", { baudRate: 38400 })
+function resetOBD() {
+
+    prettyLog("Resetting obd")
+    obd.write("atz")
+}
+obd.on("error", function(error) { prettyLog("Serial port obd error: " + error) })
 obd.on("data", function(data) {
+
     var dataString = String(data)
     if (dataString.startsWith(">LM327 ")) {
+
         prettyLog("ELM327 started up")
     }
     else if (dataString.startsWith("41 0C")) {
+
         // rpm data incoming
         if (dataString.length == 12 &&
             dataString[5] == " " &&
@@ -277,7 +271,7 @@ obd.on("data", function(data) {
         }
     }
     obd.write(RPM_PID)
-    lastRequest = new Date().getTime()
+    lastRequest = now()
 })
 resetOBD()
 
