@@ -12,18 +12,23 @@ var lastUpdate =  null
 var data = null
 var noble = require("noble")
 noble.on("stateChange", function(state) {
+
     prettyLog("State change: " + state)
     if (state === "poweredOn") {
+
         isOn = true
         noble.startScanning()
     }
     else {
+        
         isOn = false
         noble.stopScanning()
     }
 })
 noble.on("discover", function(peripheral) {
+
     if (peripheral.advertisement.localName == INTERFACE_NAME) {
+
         noble.stopScanning()
         prettyLog("Found Interface!", peripheral.address)
         prettyLog("TX power level: " + peripheral.advertisement.txPowerLevel, peripheral.address)
@@ -35,11 +40,14 @@ noble.on("discover", function(peripheral) {
     //else prettyLog("Found non-Interface: " + peripheral.advertisement.localName)
 })
 function interfaceDisconnect(peripheral) {
+
     if (updateRSSIint != null) {
+
         clearInterval(updateRSSIint)
         udpateRSSIint = null
     }
     if (updateInt != null) {
+
         clearInterval(updateInt)
         updateInt = null
     }
@@ -50,8 +58,10 @@ function interfaceDisconnect(peripheral) {
 }
 
 function initInterface(peripheral) {
+
     peripheral.on("disconnect", interfaceDisconnect(peripheral))
     peripheral.connect(function(error) {
+
         if (error) {
             prettyLog("Error connecting to Interface: " + error, peripheral.address)
             prettyLog("Interface disconnected with address: " + peripheral.address, peripheral.address)
@@ -60,10 +70,12 @@ function initInterface(peripheral) {
             peripheral.removeAllListeners()
         }
         else {
+
             prettyLog("Successfully onnected to Interface", peripheral.address)
             
             // Create an interval which gets the RSSI of interface every second
             updateRSSIint = setInterval(function() {
+
                 peripheral.updateRssi()
             }, 1000)
 
