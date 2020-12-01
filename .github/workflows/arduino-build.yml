@@ -1,0 +1,27 @@
+name: Arduino CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get latest release
+        uses: pozetroninc/github-action-get-latest-release@v0.5.0
+        with:
+          repository: arduino/arduino-cli
+      
+      - name: Add execute permission
+        run: chmod +x ./arduino-cli
+      
+      - name: Compile
+        run: ./arduino-cli compile -b arduino:avr:mega --build-path ./build lights.cp
