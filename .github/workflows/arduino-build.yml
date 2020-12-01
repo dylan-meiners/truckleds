@@ -21,7 +21,9 @@ jobs:
           repository: arduino/arduino-cli
       
       - name: Add execute permission
-        run: chmod +x ./arduino-cli
+        run: |
+          ls .
+          chmod +x ./arduino-cli
       
       - name: Compile
         run: ./arduino-cli compile -b arduino:avr:mega --build-path ./build lights.cp
