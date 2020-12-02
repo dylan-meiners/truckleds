@@ -34,6 +34,10 @@ jobs:
           ./arduino-cli core update-index
           ./arduino-cli core install arduino:avr
       
+      - name: Install FastLED library
+        run: |
+          ./arduino-cli lib install fastled
+      
       - name: Compile
         run: |
           mkdir -p lights/build
