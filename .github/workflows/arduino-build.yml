@@ -15,15 +15,26 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Get latest release
-        uses: pozetroninc/github-action-get-latest-release@v0.5.0
+      - name: Get arduino-cli 0.10.0 release
+        uses: dsaltares/fetch-gh-release-asset@master
         with:
-          repository: arduino/arduino-cli
+          repo: "arduino/arduino-cli"
+          version: "tags/0.10.0"
+          file: "arduino-cli_0.10.0_Linux_64bit.tar.gz"
       
-      - name: Add execute permission
+      - name: Extract arduino-cli release
         run: |
-          ls .
-          chmod +x ./arduino-cli
+          tar -xf arduino-cli_0.10.0_Linux_64bit.tar.gz
+        
+      - name: Add execute permission to arduino-cli
+        run: chmod +x arduino-cli
+      
+      - name: Install arduino avr core
+        run: |
+          ./arduino-cli core update-index
+          ./arduino-cli core install arduino:avr
       
       - name: Compile
-        run: ./arduino-cli compile -b arduino:avr:mega --build-path ./build lights.cp
+        run: |
+          mkdir -p lights/build
+          ./arduino-cli compile -b arduino:avr:mega --build-path "/home/runner/work/truckleds/truckleds/lights/build/" ./lights/lights.cpp
