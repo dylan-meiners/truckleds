@@ -4,3 +4,9 @@ control/*
 package-lock.json
 desktop.ini
 Icon/*
+
+*.elf
+*.hex
+*/logs/*
+*.out
+build/

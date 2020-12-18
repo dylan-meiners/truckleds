@@ -97,6 +97,7 @@ void setup() {
     FastLED.setBrightness(255);
     FastLED.clear();
     FastLED.show();
+    switchEffect(E_RPM);
 }
 
 void loop() {

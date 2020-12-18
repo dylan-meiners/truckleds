@@ -1,5 +1,5 @@
 console.clear()
-
+/*
 // BLE
 const INTERFACE_NAME = "Interface iOS"
 const INTERFACE_SERVICE_UUID = "45c8c4868812466da5d20d81c4d6a8a4"
@@ -49,7 +49,9 @@ function interfaceDisconnect(peripheral) {
     isConnectedToValidInterface = false
     peripheral.removeAllListeners()
 }
-
+*/
+function test() {
+/*
 function initInterface(peripheral) {
     peripheral.on("disconnect", interfaceDisconnect(peripheral))
     peripheral.connect(function(error) {
@@ -93,20 +95,23 @@ function initInterface(peripheral) {
 
                         // Set up a callback for whenever Interface updates the characteristic
                         characteristics[0].on("data", function(newData) {
-
+*/
                             // Save the time of when the characteristic was last updated
                             lastUpdate = now()
-
+                            data = "00000"
+                            newData = [0, 0, 0, 1, 0]
+                            peripheral = {}
+                            peripheral.address = "FAKE ADDRESS"
+                            let DATA_BUFFER_LEN = 5
                             // Right now the data is an object, which appears to be a buffer of ASCII values,
                             // so convert it to a regular string
-                            data = newData.toString("utf-8")
-                            prettyLog("Got new data: " + data, peripheral.address)
+                            //data = newData.toString("utf-8")
+                            //prettyLog("Got new data: " + data, peripheral.address)
 
                             // Create an empty array to store the ASCII bytes that will be sent to the Arduino
                             var toSend = []
-
                             // Check to make sure that the data we received from Interface is the right length
-                            if (data.length == DATA_BUFFER_LEN) {
+                            if (data.length === DATA_BUFFER_LEN) {
 
                                 //These should only ever be "1" or "0"
                                 var warning = data[0] == "1" ? 1 : 0
@@ -123,7 +128,10 @@ function initInterface(peripheral) {
                                 // A variable is used to store the index of the effect that the Arduino will use.
                                 // TODO: This system can be greatly improved for scalability later
                                 var correspondingIndex = 0
-                                
+
+                                warning = false
+                                effect = true
+
                                 if (warning) {
                                     
                                     if (warningIndex == 3 || warningIndex == 4 || warningIndex == 5) {
@@ -134,14 +142,15 @@ function initInterface(peripheral) {
                                 }
                                 else if (effect) {
                                     
-                                    correspondingIndex = effectIndex + 16
+                                    correspondingIndex = 20 //effectIndex + 16
                                     // If index is for rpm
-                                    if (correspondingIndex == 20) {
+                                    if (correspondingIndex === 20) {
                                         // If we were off
+                                        //if (!rpmOn) prettyLog("off")
                                         if (!rpmOn) {
-                                            checker = setInterval(function() {
-                                                if (new Date().getTime() - lastRequest >= 100) resetOBD()
-                                            }, 1000)
+                                            /*checker = setInterval(function() {
+                                                if (now() - lastRequest >= 100) resetOBD()
+                                            }, 1000)*/
                                             resetOBD()
                                         }
                                         rpmOn = true
@@ -149,27 +158,35 @@ function initInterface(peripheral) {
                                 }
                                 toSend.push(correspondingIndex)
                                 toSend.push(police)
-                                if (correspondingIndex == 20) toSend.push(rpm)
+                                if (correspondingIndex == 20) {
+                                    let rpmToSend = Math.round(((rpm - 500) / 6500) * 256)
+                                    rpmToSend = rpmToSend < 0 ? 0 : rpmToSend
+                                    rpmToSend = rpmToSend > 255 ? 255 : rpmToSend
+                                    toSend.push(rpmToSend)
+                                    prettyLog(toSend)
+                                }
                                 else if (rpmOn) {
                                     if (checker != null) clearInterval(checker)
                                     checker = null
                                     rpmOn = false
                                 }
+                               // prettyLog(toSend)
                             }
-                            
+
                             // Signal the arduino that the Pi is ready to send data
                             dataRequestPin.writeSync(1)
                             // Save the current time for checking if there is a timeout (1 second)
                             var serialTimeoutMillis = now()
                             // Do nothing while the Pi is waiting for the Arduino to signal it is ready or while
                             // a timeout has not occurred
-                            while (dataAckPin.readSync() === 0 || (now() - serialTimeoutMillis < 1000));
+                            //while (dataAckPin.readSync() === 0 || (now() - serialTimeoutMillis < 1));
                             // The loop could have exited due to a timeout, so check before sending data if the Arduino
                             // is ready
                             if (dataAckPin.readSync() === 1) arduino.write(toSend)
                             else prettyLog("Couldn't send data because serial timed out")
+/*
                         })
-                        
+
                         // Create an interval that checks if Interface is no longer connected properly every one second
                         updateInt = setInterval(function() {
 
@@ -209,8 +226,10 @@ function initInterface(peripheral) {
         }
     })
 }
-
-setInterval(function() {
+*/
+}
+/*
+setInterval(function() {/
 
     if (!isConnectedToValidInterface && isOn) {
 
@@ -223,7 +242,7 @@ function toggleScannerOffOn() {
     noble.stopScanning()
     noble.startScanning()
 }
-
+*/
 // Raspberry Pi GPIO
 var GPIO = require("onoff").Gpio
 var dataRequestPin = new GPIO(21, "out")
@@ -242,38 +261,45 @@ var rpm = 0
 var rpmOn = false
 var checker = null
 var lastRequest = null
-const obd = new SerialPort("/dev/ttyACM1", { baudRate: 38400 })
+var obd = new SerialPort("/dev/ttyUSB0", { baudRate: 38400 })
 function resetOBD() {
 
     prettyLog("Resetting obd")
-    obd.write("atz")
+    obd.write("atz\r")
 }
 obd.on("error", function(error) { prettyLog("Serial port obd error: " + error) })
 obd.on("data", function(data) {
 
     var dataString = String(data)
-    if (dataString.startsWith(">LM327 ")) {
+    var withoutReturn = []
+    for (let i = 0; i < dataString.length; ++i) {
+        withoutReturn.push(dataString.charCodeAt(i))
+     }
+    prettyLog(withoutReturn)
+    let startedUp = dataString.startsWith("\r\rELM327")
+    if (startedUp) {
 
         prettyLog("ELM327 started up")
     }
     else if (dataString.startsWith("41 0C")) {
 
         // rpm data incoming
-        if (dataString.length == 12 &&
-            dataString[5] == " " &&
-            dataString[8] == " " &&
-            dataString[11] == "\r") {
-            var rpmToSet = (256 * parseInt(data[6] + data[7], 16) + parseInt(data[9] + data[10], 16)) / 4
-            if (rpmToSet > 0 && rpmToSet < 16383.75) rpm = rpmToSet
+        if (dataString.length === 13 &&
+            dataString[5] === " " &&
+            dataString[8] === " " &&
+            dataString[12] === "\r") {
+            var rpmToSet = (256 * parseInt(dataString[6] + dataString[7], 16) + parseInt(dataString[9] + dataString[10], 16)) / 4
+	    if (rpmToSet > 0 && rpmToSet < 16383.75) rpm = rpmToSet
             rpm = Math.round(rpm)
             if (rpm < 0) rpm = 0
             else if (rpm > 7000) rpm = 7000
         }
     }
-    obd.write(RPM_PID)
+    if (dataString.startsWith("\r>") || startedUp) {
+    	obd.write(RPM_PID)
+    }
     lastRequest = now()
 })
-resetOBD()
 
 // Util
 function prettyLog(str="", address="") {
@@ -284,3 +310,11 @@ function prettyLog(str="", address="") {
     process.stdout.write(" > " + str + "\n")
 }
 function now() { return new Date().getTime() }
+
+//resetOBD()
+//test()
+
+setInterval(function() {
+    test()
+}, 20)
+

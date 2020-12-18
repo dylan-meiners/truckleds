@@ -675,10 +675,10 @@ class RPM : public Effect {
             }
         }
 
-        void reset() { m_rpm = 0.0 }
+        void reset() { m_rpm = 0.0; }
 
-        double m_rpm = 0.0
-}
+        double m_rpm = 0.0;
+};
 
 class Blinker : public Effect {
 
