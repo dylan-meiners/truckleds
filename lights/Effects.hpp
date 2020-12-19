@@ -662,7 +662,7 @@ class RPM : public Effect {
 
         bool step(CRGB **leds, long current, bool strobeToggle, bool police, bool brake) {
 
-            double scaled = m_rpm / MAX_RPM * NUM_RB_LEDS;
+            double scaled = (double)m_rpm / MAX_RPM * NUM_RB_LEDS;
             if (scaled < 0) scaled = 0;
             else if (scaled > NUM_RB_LEDS) scaled = (double)NUM_RB_LEDS;
             int on = RoundLit(scaled);
@@ -675,9 +675,9 @@ class RPM : public Effect {
             }
         }
 
-        void reset() { m_rpm = 0.0; }
+        void reset() { m_rpm = 0; }
 
-        double m_rpm = 0.0;
+        int m_rpm = 0;
 };
 
 class Blinker : public Effect {
