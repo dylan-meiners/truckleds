@@ -8,8 +8,9 @@ import pyqtgraph as pg
 import math
 
 import RPi.GPIO as GPIO
-PI_IS_REQUESTING_PIN = 21
-ARDUINO_IS_READY_PIN = 20
+PI_IS_REQUESTING_PIN = 40
+ARDUINO_IS_READY_PIN = 38
+GPIO.setmode(GPIO.BOARD)
 GPIO.setup(PI_IS_REQUESTING_PIN, GPIO.OUT)
 GPIO.setup(ARDUINO_IS_READY_PIN, GPIO.IN)
 
@@ -20,7 +21,7 @@ RATE = 44100
 MAX = .4
 MIN = 0.15
 
-GPIO.setmode(GPIO.BOARD)
+
 ser = serial.Serial(port="/dev/ttyACM0", baudrate=115200, timeout=5)
 print("Connected over " + ser.name)
 time.sleep(1)
