@@ -21,6 +21,9 @@ port.on("data", function(data) {
     //prettyLog("New serial data available: " + data)
     console.log(data)
 })
+port.on("close", function() {
+    prettyLog("Serial port closed")
+})
 
 const INTERFACE_NAME = "Interface iOS"
 const INTERFACE_SERVICE_UUID = "45c8c4868812466da5d20d81c4d6a8a4"
@@ -144,15 +147,22 @@ function run(peripheral) {
                                 }
                                 else if (effect) {
                                     correspondingIndex = effectIndex + 16
+                                    if (correspondingIndex == 17) {
+                                        if (!musicRunning) startMusic()
+                                    }
+                                    else if (musicRunning) stopMusic()
                                 }
                                 toSend.push(correspondingIndex)
                                 toSend.push(police)
                             }
-                            piIsRequestingPin.writeSync(1)
-                            var serialTimeoutMillis = new Date().getTime()
-                            while (arduinoIsReadyPin.readSync() === 0 || (new Date().getTime() - serialTimeoutMillis < 1000));
-                            if (arduinoIsReadyPin.readSync() === 1) { port.write(toSend) }
-                            else prettyLog("Couldn't send data because serial timed out")
+                            if (!musicRunning) {
+
+                                piIsRequestingPin.writeSync(1)
+                                var serialTimeoutMillis = new Date().getTime()
+                                while (arduinoIsReadyPin.readSync() === 0 || (new Date().getTime() - serialTimeoutMillis < 1000));
+                                if (arduinoIsReadyPin.readSync() === 1) { port.write(toSend) }
+                                else prettyLog("Couldn't send data because serial timed out")
+                            }
                         })
                         
                         updateInt = setInterval(function() {
@@ -182,4 +192,30 @@ function run(peripheral) {
             }
         }
     })
+}
+
+// Music
+const { exec } = require("child_process")
+var musicRunning = false
+function execc(processName, command) {
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            prettyLog(`${processName} error: ${error.message}`)
+            return
+        }
+        if (stderr) {
+            prettyLog(`${processName} stderr: ${stderr}`)
+            return
+        }
+        prettyLog(`${processName} stdout: ${stdout}`)
+    })
+}
+function startMusic() {
+    port.close()
+    execc("music", "sudo python3 ./music/music-simple.py")
+    musicRunning = true
+}
+function stopMusic() {
+    execc("music", "sudo pkill python3")
+    musicRunning = false
 }
