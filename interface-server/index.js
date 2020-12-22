@@ -211,9 +211,10 @@ function execc(processName, command) {
     })
 }
 function startMusic() {
-    port.close()
-    execc("music", "sudo python3 ./music/music-simple.py")
-    musicRunning = true
+    port.close(function() {
+        execc("music", "sudo python3 ./music/music-simple.py")
+        musicRunning = true
+    })
 }
 function stopMusic() {
     execc("music", "sudo pkill python3")
